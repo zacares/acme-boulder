@@ -58,7 +58,7 @@ func TestCRLPipeline(t *testing.T) {
 	// Issue a test certificate and save its serial number.
 	client, err := makeClient()
 	test.AssertNotError(t, err, "creating acme client")
-	res, err := authAndIssue(client, nil, []string{random_domain()}, true)
+	res, err := authAndIssue(client, nil, []string{random_domain()}, true, "")
 	test.AssertNotError(t, err, "failed to create test certificate")
 	cert := res.certs[0]
 	serial := core.SerialToString(cert.SerialNumber)

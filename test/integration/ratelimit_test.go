@@ -18,13 +18,13 @@ func TestDuplicateFQDNRateLimit(t *testing.T) {
 	domain := random_domain()
 
 	// The global rate limit for a duplicate certificates is 2 per 3 hours.
-	_, err := authAndIssue(nil, nil, []string{domain}, true)
+	_, err := authAndIssue(nil, nil, []string{domain}, true, "")
 	test.AssertNotError(t, err, "Failed to issue first certificate")
 
-	_, err = authAndIssue(nil, nil, []string{domain}, true)
+	_, err = authAndIssue(nil, nil, []string{domain}, true, "")
 	test.AssertNotError(t, err, "Failed to issue second certificate")
 
-	_, err = authAndIssue(nil, nil, []string{domain}, true)
+	_, err = authAndIssue(nil, nil, []string{domain}, true, "")
 	test.AssertError(t, err, "Somehow managed to issue third certificate")
 
 	if strings.Contains(os.Getenv("BOULDER_CONFIG_DIR"), "test/config-next") {
@@ -47,13 +47,13 @@ func TestCertificatesPerDomain(t *testing.T) {
 	}
 
 	firstSubDomain := randomSubDomain()
-	_, err := authAndIssue(nil, nil, []string{firstSubDomain}, true)
+	_, err := authAndIssue(nil, nil, []string{firstSubDomain}, true, "")
 	test.AssertNotError(t, err, "Failed to issue first certificate")
 
-	_, err = authAndIssue(nil, nil, []string{randomSubDomain()}, true)
+	_, err = authAndIssue(nil, nil, []string{randomSubDomain()}, true, "")
 	test.AssertNotError(t, err, "Failed to issue second certificate")
 
-	_, err = authAndIssue(nil, nil, []string{randomSubDomain()}, true)
+	_, err = authAndIssue(nil, nil, []string{randomSubDomain()}, true, "")
 	test.AssertError(t, err, "Somehow managed to issue third certificate")
 
 	if strings.Contains(os.Getenv("BOULDER_CONFIG_DIR"), "test/config-next") {
@@ -66,6 +66,6 @@ func TestCertificatesPerDomain(t *testing.T) {
 
 	// Issue a certificate for the first subdomain, which should succeed because
 	// it's a renewal.
-	_, err = authAndIssue(nil, nil, []string{firstSubDomain}, true)
+	_, err = authAndIssue(nil, nil, []string{firstSubDomain}, true, "")
 	test.AssertNotError(t, err, "Failed to issue renewal certificate")
 }

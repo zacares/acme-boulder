@@ -75,6 +75,6 @@ func TestIdentifiersPausedForAccount(t *testing.T) {
 	})
 	test.AssertNotError(t, err, "Failed to unpause domain")
 
-	_, err = authAndIssue(c, nil, []string{domain}, true)
+	_, err = authAndIssue(c, nil, []string{domain}, true, "")
 	test.AssertNotError(t, err, "Should be able to issue a certificate for an unpaused domain")
 }

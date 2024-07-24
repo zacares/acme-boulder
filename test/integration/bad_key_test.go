@@ -53,7 +53,7 @@ func TestFermat(t *testing.T) {
 			domain := random_domain()
 
 			order, err := c.Client.NewOrder(
-				c.Account, []acme.Identifier{{Type: "dns", Value: domain}})
+				c.Account, []acme.Identifier{{Type: "dns", Value: domain}}, "")
 			test.AssertNotError(t, err, "creating new order")
 			test.AssertEquals(t, len(order.Authorizations), 1)
 
