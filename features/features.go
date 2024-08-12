@@ -109,6 +109,15 @@ type Config struct {
 	// get the AUTO_INCREMENT ID of each new authz without relying on MariaDB's
 	// unique "INSERT ... RETURNING" functionality.
 	InsertAuthzsIndividually bool
+
+	// NewOrdersSchema causes the SA to write to and read from the updated
+	// orders, authorizations, and validations tables.
+	// - Inserts go solely to the new schema
+	// - Updates go to whichver schema hosts the row being updated
+	// - Simple select-by-id go to whichever schema hosts the row being selected
+	// - Complex queries go solely to the new schema (this means that authz and
+	//   order reuse work only in the new schema).
+	NewOrdersSchema bool
 }
 
 var fMu = new(sync.RWMutex)
