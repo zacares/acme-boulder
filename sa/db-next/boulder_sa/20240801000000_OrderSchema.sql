@@ -11,17 +11,15 @@
 -- to the "invalid" state; errors during validation are reflected elsewhere.
 CREATE TABLE `orders2` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `registrationID` bigint(20) NOT NULL,
+  `registrationID` bigint(20) UNSIGNED NOT NULL,
   `created` datetime NOT NULL,
   `expires` datetime NOT NULL,
   `authorizations` json NOT NULL,
   `profile` varchar(255) NOT NULL,
-  `status` tinyint(4) NOT NULL,
+  `beganProcessing` boolean NOT NULL,
   `error` mediumblob DEFAULT NULL,
   `certificateSerial` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `reg_status_expires` (`registrationID`,`expires`),
-  KEY `regID_created_idx` (`registrationID`,`created`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
  PARTITION BY RANGE(id)
 (PARTITION p_start VALUES LESS THAN (MAXVALUE));
@@ -33,7 +31,7 @@ CREATE TABLE `orders2` (
 -- to a new row in the validations table containing the record of that attempt.
 CREATE TABLE `authorizations` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `registrationID` bigint(20) NOT NULL,
+  `registrationID` bigint(20) UNSIGNED NOT NULL,
   `identifierType` tinyint(4) NOT NULL,
   `identifierValue` varchar(255) NOT NULL,
   `created` datetime NOT NULL,
@@ -44,22 +42,23 @@ CREATE TABLE `authorizations` (
   `status` tinyint(4) NOT NULL,
   `validations` json DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `regID_expires_idx` (`registrationID`,`status`,`expires`),
-  KEY `regID_identifier_status_expires_idx` (`registrationID`,`identifierType`,`identifierValue`,`status`,`expires`),
-  KEY `expires_idx` (`expires`)
+  KEY `regID_identifier_status_expires_idx` (`registrationID`,`identifierValue`,`status`,`expires`,`identifierType`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
  PARTITION BY RANGE(id)
 (PARTITION p_start VALUES LESS THAN (MAXVALUE));
+
 
 -- The validations table holds records of completed validation attempts,
 -- including the validation method used, the resulting status (valid or
 -- invalid), and an opaque blob of our audit record.
 CREATE TABLE `validations` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `registrationID` bigint(20) UNSIGNED NOT NULL,
   `challenge` tinyint(4) NOT NULL,
   `attemptedAt` datetime NOT NULL,
   `status` tinyint(4) NOT NULL,
-  `record` json DEFAULT NULL,
+  `record` json NOT NULL,
+  PRIMARY KEY (`id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
  PARTITION BY RANGE(id)
 (PARTITION p_start VALUES LESS THAN (MAXVALUE));
