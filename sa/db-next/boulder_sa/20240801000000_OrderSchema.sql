@@ -10,7 +10,7 @@
 -- is populated only if an error occurs during finalization and the order moves
 -- to the "invalid" state; errors during validation are reflected elsewhere.
 CREATE TABLE `orders2` (
-  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) UNSIGNED NOT NULL,
   `registrationID` bigint(20) UNSIGNED NOT NULL,
   `created` datetime NOT NULL,
   `expires` datetime NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE `orders2` (
 -- "valid" or "invalid", and the validations column will be updated to point
 -- to a new row in the validations table containing the record of that attempt.
 CREATE TABLE `authorizations` (
-  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) UNSIGNED NOT NULL,
   `registrationID` bigint(20) UNSIGNED NOT NULL,
   `identifierType` tinyint(4) NOT NULL,
   `identifierValue` varchar(255) NOT NULL,
@@ -42,7 +42,6 @@ CREATE TABLE `authorizations` (
   `status` tinyint(4) NOT NULL,
   `validations` json DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `regID_identifier_status_expires_idx` (`registrationID`,`identifierValue`,`status`,`expires`,`identifierType`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
  PARTITION BY RANGE(id)
 (PARTITION p_start VALUES LESS THAN (MAXVALUE));
@@ -52,7 +51,7 @@ CREATE TABLE `authorizations` (
 -- including the validation method used, the resulting status (valid or
 -- invalid), and an opaque blob of our audit record.
 CREATE TABLE `validations` (
-  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) UNSIGNED NOT NULL,
   `registrationID` bigint(20) UNSIGNED NOT NULL,
   `challenge` tinyint(4) NOT NULL,
   `attemptedAt` datetime NOT NULL,
@@ -63,9 +62,20 @@ CREATE TABLE `validations` (
  PARTITION BY RANGE(id)
 (PARTITION p_start VALUES LESS THAN (MAXVALUE));
 
+-- The authzReuse table exists solely to allow cheap lookups of reusable authz
+-- IDs. This allos us to not have expensive indices on the authorizations table.
+CREATE TABLE `authzReuse` (
+  `accountID_identifier` VARCHAR(300) NOT NULL,
+  `authzID` VARCHAR(255) NOT NULL,
+  `expires` DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+ PARTITION BY RANGE(id)
+(PARTITION p_start VALUES LESS THAN (MAXVALUE));
+
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back
 
+DROP TABLE `authzReuse`;
 DROP TABLE `validations`;
 DROP TABLE `authorizations`;
 DROP TABLE `orders2`;

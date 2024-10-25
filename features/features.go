@@ -110,14 +110,21 @@ type Config struct {
 	// unique "INSERT ... RETURNING" functionality.
 	InsertAuthzsIndividually bool
 
-	// NewOrdersSchema causes the SA to write to and read from the updated
-	// orders, authorizations, and validations tables.
-	// - Inserts go solely to the new schema
-	// - Updates go to whichver schema hosts the row being updated
+	// ReadNewOrderSchema causes the SA to attempt to read from the new orders,
+	// authorizations, and validations tables. This allows us to continue reading
+	// from these tables even if we have to roll back the flag which causes us
+	// to write to them.
 	// - Simple select-by-id go to whichever schema hosts the row being selected
 	// - Complex queries go solely to the new schema (this means that authz and
 	//   order reuse work only in the new schema).
-	NewOrdersSchema bool
+	ReadNewOrderSchema bool
+
+	// WriteNewOrderSchema causes the SA to write to the new orders,
+	// authorizations, and validations tables. Do not enable this flag unless
+	// ReadNewOrderSchema is also enabled.
+	// - Inserts go solely to the new schema
+	// - Updates go to whichver schema hosts the row being updated
+	WriteNewOrderSchema bool
 }
 
 var fMu = new(sync.RWMutex)
