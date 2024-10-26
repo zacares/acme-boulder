@@ -14,7 +14,7 @@ CREATE TABLE `orders2` (
   `registrationID` bigint(20) UNSIGNED NOT NULL,
   `created` datetime NOT NULL,
   `expires` datetime NOT NULL,
-  `authorizations` json NOT NULL,
+  `authorizationIDs` json NOT NULL,
   `profile` varchar(255) NOT NULL,
   `beganProcessing` boolean NOT NULL,
   `error` mediumblob DEFAULT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE `authorizations` (
   `challenges` tinyint(4) NOT NULL,
   `token` binary(32) NOT NULL,
   `status` tinyint(4) NOT NULL,
-  `validations` json DEFAULT NULL,
+  `validationIDs` json DEFAULT NULL,
   PRIMARY KEY (`id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
  PARTITION BY RANGE(id)
@@ -52,7 +52,6 @@ CREATE TABLE `authorizations` (
 -- invalid), and an opaque blob of our audit record.
 CREATE TABLE `validations` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `registrationID` bigint(20) UNSIGNED NOT NULL,
   `challenge` tinyint(4) NOT NULL,
   `attemptedAt` datetime NOT NULL,
   `status` tinyint(4) NOT NULL,
@@ -66,7 +65,7 @@ CREATE TABLE `validations` (
 -- IDs. This allos us to not have expensive indices on the authorizations table.
 CREATE TABLE `authzReuse` (
   `accountID_identifier` VARCHAR(300) NOT NULL,
-  `authzID` VARCHAR(255) NOT NULL,
+  `authzID` bigint(20) UNSIGNED NOT NULL,
   `expires` DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
  PARTITION BY RANGE(id)
